@@ -1,0 +1,15 @@
+# Ignore the build directory
+build/
+cmake-build-debug/
+
+# Ignore compiled object files and binaries
+*.o
+*.exe
+*.out
+
+# Ignore OS specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE specific folders (optional, if you use VSCode)
+.vscode/
