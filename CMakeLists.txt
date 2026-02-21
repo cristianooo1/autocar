@@ -18,10 +18,13 @@ FetchContent_MakeAvailable(SFML)
 
 add_executable(${PROJECT_NAME} 
     src/main.cpp 
-    # src/ball.cpp 
-    # src/ball.h
+    src/game.cpp
+    src/car.cpp
+    include/game.h
+    include/car.h
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE SFML::Graphics)
 
