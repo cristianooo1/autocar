@@ -7,8 +7,9 @@ public:
     Car()
     {
         shape.setSize(sf::Vector2f(carWidth, carHeight));
+        shape.setOrigin(sf::Vector2f(carWidth / 2, 2 * carHeight / 3));
         shape.setFillColor(sf::Color::Black);
-        shape.setPosition(sf::Vector2f(0.f, 0.f));
+        shape.setPosition(sf::Vector2f(100.f, 100.f));
     }
 
     void moveOffset(sf::Vector2f velocity)
@@ -25,25 +26,31 @@ public:
     sf::Vector2f getPos() const
     {
         return shape.getPosition();
+        // return shape.getGlobalBounds();
+    }
+
+    sf::FloatRect getGBounds() const
+    {
+        return shape.getGlobalBounds();
     }
 
     void clampBoundaries(int windowWidth, int windowHeight)
     {
         // left wall
-        if (getPos().x < 0)
-            moveAbs(0, getPos().y);
+        if (getGBounds().position.x < 0)
+            moveAbs(carWidth / 2, getPos().y);
 
         // right wall
-        if (getPos().x + carWidth > windowWidth)
-            moveAbs(windowWidth - carWidth, getPos().y);
+        if (getGBounds().position.x + carWidth > windowWidth)
+            moveAbs(windowWidth - carWidth / 2, getPos().y);
 
         // top wall
-        if (getPos().y < 0)
-            moveAbs(getPos().x, 0);
+        if (getGBounds().position.y < 0)
+            moveAbs(getPos().x, 2 * carHeight / 3);
 
         // bottom wall
-        if (getPos().y + carHeight > windowHeight)
-            moveAbs(getPos().x, windowHeight - carHeight);
+        if (getGBounds().position.y + carHeight > windowHeight)
+            moveAbs(getPos().x, windowHeight - carHeight / 3);
     }
 
     void render(sf::RenderWindow &window)
@@ -54,8 +61,8 @@ public:
 private:
     // sf::CircleShape shape;
     sf::RectangleShape shape;
-    float carWidth = 50.f;
-    float carHeight = 50.f;
+    float carWidth = 60.f;
+    float carHeight = 120.f;
     float vel = 2.f;
 };
 
@@ -119,6 +126,11 @@ int main()
             float currX = car.getPos().x;
             float currY = car.getPos().y;
             std::cout << "curr car pos x=" << currX << " and pos y=" << currY << std::endl;
+
+            float gx = car.getGBounds().position.x;
+            float gy = car.getGBounds().position.y;
+            std::cout << "curr car pos gx=" << gx << " and pos gy=" << gy << std::endl;
+
             iteration = 0;
         }
         window.display();
