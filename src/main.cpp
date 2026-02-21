@@ -59,6 +59,33 @@ private:
     float vel = 2.f;
 };
 
+void wasdMove(Car &cr, sf::Vector2f(vel))
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    {
+        cr.moveOffset(sf::Vector2f(0.f, -vel.y));
+        std::cout << "W is pressed" << std::endl;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+    {
+        cr.moveOffset(sf::Vector2f(-vel.x, 0.f));
+        std::cout << "A is pressed" << std::endl;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    {
+        cr.moveOffset(sf::Vector2f(0.f, vel.y));
+        std::cout << "S is pressed" << std::endl;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+    {
+        cr.moveOffset(sf::Vector2f(+vel.x, 0.f));
+        std::cout << "D is pressed" << std::endl;
+    }
+}
+
 int main()
 {
     unsigned int cellY = 25;
@@ -79,29 +106,7 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-            {
-                car.moveOffset(sf::Vector2f(0.f, -velocity.y));
-                std::cout << "W is pressed" << std::endl;
-            }
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-            {
-                car.moveOffset(sf::Vector2f(-velocity.x, 0.f));
-                std::cout << "A is pressed" << std::endl;
-            }
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-            {
-                car.moveOffset(sf::Vector2f(0.f, velocity.y));
-                std::cout << "S is pressed" << std::endl;
-            }
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-            {
-                car.moveOffset(sf::Vector2f(+velocity.x, 0.f));
-                std::cout << "D is pressed" << std::endl;
-            }
+            wasdMove(car, velocity);
         }
 
         window.clear(sf::Color::Green);
