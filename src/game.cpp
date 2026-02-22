@@ -9,7 +9,7 @@ void GameObj::initWindow()
     this->window.create(sf::VideoMode(
                             {cellY * cellX, cellY * cellX}),
                         "autocar",
-                        sf::Style::Titlebar);
+                        sf::Style::Titlebar | sf::Style::Close);
 
     this->window.setFramerateLimit(60);
 }
@@ -33,7 +33,6 @@ GameObj::~GameObj()
 void GameObj::updateCar()
 {
     this->car->update();
-    this->updateCarBoundaries(25 * 24, 25 * 24);
 }
 
 void GameObj::updateCarBoundaries(int windowWidth, int windowHeight)
@@ -44,20 +43,33 @@ void GameObj::updateCarBoundaries(int windowWidth, int windowHeight)
     */
 
     // left wall
-    if (this->car->getGBounds().position.x < 0)
-        this->car->moveAbs(this->car->getSize().x / 2, this->car->getPos().y);
-
+    if (this->car->getGlobalBounds().position.x < 0)
+    {
+        this->car->resetVelocity();
+        this->car->setPosition(this->car->getSize().x / 2, this->car->getPosition().y);
+        std::cout << "Detected collision with left wall" << std::endl;
+    }
     // right wall
-    if (this->car->getGBounds().position.x + this->car->getSize().x > windowWidth)
-        this->car->moveAbs(windowWidth - this->car->getSize().x / 2, this->car->getPos().y);
-
+    if (this->car->getGlobalBounds().position.x + this->car->getSize().x > windowWidth)
+    {
+        this->car->resetVelocity();
+        this->car->setPosition(windowWidth - this->car->getSize().x / 2, this->car->getPosition().y);
+        std::cout << "Detected collision with right wall" << std::endl;
+    }
     // top wall
-    if (this->car->getGBounds().position.y < 0)
-        this->car->moveAbs(this->car->getPos().x, 2 * this->car->getSize().y / 3);
-
+    if (this->car->getGlobalBounds().position.y < 0)
+    {
+        this->car->resetVelocity();
+        this->car->setPosition(this->car->getPosition().x, 2 * this->car->getSize().y / 3);
+        std::cout << "Detected collision with top wall" << std::endl;
+    }
     // bottom wall
-    if (this->car->getGBounds().position.y + this->car->getSize().y > windowHeight)
-        this->car->moveAbs(this->car->getPos().x, windowHeight - this->car->getSize().y / 3);
+    if (this->car->getGlobalBounds().position.y + this->car->getSize().y > windowHeight)
+    {
+        this->car->resetVelocity();
+        this->car->setPosition(this->car->getPosition().x, windowHeight - this->car->getSize().y / 3);
+        std::cout << "Detected collision with bottom wall" << std::endl;
+    }
 }
 
 void GameObj::update()
@@ -68,7 +80,9 @@ void GameObj::update()
         if (event->is<sf::Event::Closed>())
             this->window.close();
     }
+
     this->updateCar();
+    this->updateCarBoundaries(this->getWindow().getSize().x, this->getWindow().getSize().x);
 }
 
 void GameObj::renderCar()

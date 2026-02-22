@@ -9,14 +9,16 @@ public:
     Car();
     virtual ~Car();
 
-    // Functions
+    // modifiers
+    void resetVelocity();
+    void setPosition(const float x, const float y);
+
+    // functions
     void move(const float dir_x, const float dir_y);
-    void moveOffset(sf::Vector2f velocity);
-    void moveAbs(float x, float y);
 
     sf::Vector2f getSize() const;
-    sf::Vector2f getPos() const;
-    sf::FloatRect getGBounds() const;
+    const sf::Vector2f getPosition() const;
+    const sf::FloatRect getGlobalBounds() const;
 
     void updatePhysics();
     void updateMovement();
@@ -30,6 +32,7 @@ private:
     float carHeight;
     float vel;
     bool moving;
+    int iteration;
 
     // physics
     sf::Vector2f velocity;

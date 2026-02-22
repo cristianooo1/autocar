@@ -20,8 +20,13 @@ add_executable(${PROJECT_NAME}
     src/main.cpp 
     src/game.cpp
     src/car.cpp
+    src/obstacle.cpp
+    src/obstacleMap.cpp
     include/game.h
     include/car.h
+    include/obstacle.h
+    include/obstacleMap.h
+    
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)

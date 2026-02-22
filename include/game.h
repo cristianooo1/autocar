@@ -6,15 +6,6 @@
 
 class GameObj
 {
-private:
-    sf::RenderWindow window;
-    // const std::optional<sf::Event> ev;
-    // sf::Event ev;
-    Car *car;
-
-    void initWindow();
-    void initPlayer();
-
 public:
     GameObj();
     virtual ~GameObj();
@@ -26,4 +17,13 @@ public:
     void renderCar();
     void render();
     const sf::RenderWindow &getWindow() const;
+
+private:
+    sf::RenderWindow window;
+    // const std::optional<sf::Event> ev;
+    // sf::Event ev;
+    Car *car;
+
+    void initWindow();
+    void initPlayer();
 };
