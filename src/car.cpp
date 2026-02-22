@@ -1,7 +1,32 @@
 #include "car.h"
 
+void Car::initVariables()
+{
+    this->moving = false;
+    this->carWidth = 60.f;
+    this->carHeight = 120.f;
+    this->vel = 1.f;
+}
+
+void Car::initPhysics()
+{
+    this->velocityMax = 10.f;
+    this->velocityMin = 1.f;
+    this->acceleration = 3.f;
+    this->drag = 0.93f;
+}
+
 Car::Car()
 {
+    /*
+    This is the constructor
+    Sets up the rectangle that is the car
+    Initializes variables
+    */
+
+    initVariables();
+    initPhysics();
+
     shape.setSize(sf::Vector2f(carWidth, carHeight));
     shape.setOrigin(sf::Vector2f(carWidth / 2, 2 * carHeight / 3));
     shape.setFillColor(sf::Color::Black);
@@ -13,42 +38,18 @@ Car::~Car()
     //
 }
 
-void Car::updateMovement()
+void Car::move(const float dir_x, const float dir_y)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-    {
-        this->moveOffset(sf::Vector2f(0.f, -vel));
-        std::cout << "W is pressed" << std::endl;
-    }
+    // acceleration
+    this->velocity.x += dir_x * this->acceleration;
+    this->velocity.y += dir_y * this->acceleration;
 
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-    {
-        this->moveOffset(sf::Vector2f(0.f, vel));
-        std::cout << "S is pressed" << std::endl;
-    }
+    // limit velocity
+    if (std::abs(this->velocity.x) > this->velocityMax)
+        this->velocity.x = this->velocityMax * ((this->velocity.x < 0) ? -1.f : 1.f);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-    {
-        this->moveOffset(sf::Vector2f(-vel, 0.f));
-        std::cout << "A is pressed" << std::endl;
-    }
-
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-    {
-        this->moveOffset(sf::Vector2f(+vel, 0.f));
-        std::cout << "D is pressed" << std::endl;
-    }
-}
-
-void Car::update()
-{
-    this->updateMovement();
-    // this->clampBoundaries();
-}
-
-void Car::render(sf::RenderTarget &target)
-{
-    target.draw(this->shape);
+    if (std::abs(this->velocity.y) > this->velocityMax)
+        this->velocity.y = this->velocityMax * ((this->velocity.y < 0) ? -1.f : 1.f);
 }
 
 void Car::moveOffset(sf::Vector2f velocity)
@@ -77,21 +78,65 @@ sf::FloatRect Car::getGBounds() const
     return shape.getGlobalBounds();
 }
 
-// void Car::clampBoundaries(int windowWidth, int windowHeight)
-// {
-//     // left wall
-//     if (getGBounds().position.x < 0)
-//         moveAbs(carWidth / 2, getPos().y);
+void Car::updatePhysics()
+{
+    // deceleration
+    this->velocity *= this->drag;
 
-//     // right wall
-//     if (getGBounds().position.x + carWidth > windowWidth)
-//         moveAbs(windowWidth - carWidth / 2, getPos().y);
+    // limit deceleration
+    if (std::abs(this->velocity.x) < this->velocityMin)
+        this->velocity.x = 0.f;
 
-//     // top wall
-//     if (getGBounds().position.y < 0)
-//         moveAbs(getPos().x, 2 * carHeight / 3);
+    if (std::abs(this->velocity.y) < this->velocityMin)
+        this->velocity.y = 0.f;
 
-//     // bottom wall
-//     if (getGBounds().position.y + carHeight > windowHeight)
-//         moveAbs(getPos().x, windowHeight - carHeight / 3);
-// }
+    this->shape.move(this->velocity);
+}
+
+void Car::updateMovement()
+{
+    this->moving = false;
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    {
+        // this->moveOffset(sf::Vector2f(0.f, -vel));
+        this->move(0.f, -1.f);
+        this->moving = true;
+        std::cout << "W is pressed" << std::endl;
+    }
+
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    {
+        // this->moveOffset(sf::Vector2f(0.f, vel));
+        this->move(0.f, 1.f);
+        this->moving = true;
+        std::cout << "S is pressed" << std::endl;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) // LEFT
+    {
+        // this->moveOffset(sf::Vector2f(-vel, 0.f));
+        this->move(-1.f, 0.f);
+        this->moving = true;
+        std::cout << "A is pressed" << std::endl;
+    }
+
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) // RIGHT
+    {
+        // this->moveOffset(sf::Vector2f(vel, 0.f));
+        this->move(1.f, 0.f);
+        this->moving = true;
+        std::cout << "D is pressed" << std::endl;
+    }
+}
+
+void Car::update()
+{
+    this->updateMovement();
+    this->updatePhysics();
+}
+
+void Car::render(sf::RenderTarget &target)
+{
+    target.draw(this->shape);
+}

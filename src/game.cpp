@@ -10,6 +10,8 @@ void GameObj::initWindow()
                             {cellY * cellX, cellY * cellX}),
                         "autocar",
                         sf::Style::Titlebar);
+
+    this->window.setFramerateLimit(60);
 }
 
 void GameObj::initPlayer()

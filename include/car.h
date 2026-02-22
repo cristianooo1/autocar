@@ -10,10 +10,7 @@ public:
     virtual ~Car();
 
     // Functions
-    void updateMovement();
-    void update();
-    void render(sf::RenderTarget &target);
-
+    void move(const float dir_x, const float dir_y);
     void moveOffset(sf::Vector2f velocity);
     void moveAbs(float x, float y);
 
@@ -21,11 +18,26 @@ public:
     sf::Vector2f getPos() const;
     sf::FloatRect getGBounds() const;
 
-    // void clampBoundaries(int windowWidth, int windowHeight);
+    void updatePhysics();
+    void updateMovement();
+
+    void update();
+    void render(sf::RenderTarget &target);
 
 private:
     sf::RectangleShape shape;
-    float carWidth = 60.f;
-    float carHeight = 120.f;
-    float vel = 1.f;
+    float carWidth;
+    float carHeight;
+    float vel;
+    bool moving;
+
+    // physics
+    sf::Vector2f velocity;
+    float velocityMax;
+    float velocityMin;
+    float acceleration;
+    float drag;
+
+    void initVariables();
+    void initPhysics();
 };
