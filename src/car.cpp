@@ -69,12 +69,12 @@ sf::Vector2f Car::getSize() const
     return this->shape.getSize();
 }
 
-const sf::Vector2f Car::getPosition() const
+sf::Vector2f Car::getPosition() const
 {
     return this->shape.getPosition();
 }
 
-const sf::FloatRect Car::getGlobalBounds() const
+sf::FloatRect Car::getGlobalBounds() const
 {
     return this->shape.getGlobalBounds();
 }

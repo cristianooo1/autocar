@@ -2,7 +2,11 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
+
 #include "car.h"
+#include "entity.h"
+#include "entityManager.h"
 
 class GameObj
 {
@@ -13,17 +17,23 @@ public:
     // Functions
     void updateCar();
     void updateCarBoundaries(int windowWidth, int windowHeight);
-    void update();
     void renderCar();
+
+    void renderEntities();
+    void updateEntities();
+
+    void update();
     void render();
     const sf::RenderWindow &getWindow() const;
 
 private:
     sf::RenderWindow window;
-    // const std::optional<sf::Event> ev;
-    // sf::Event ev;
     Car *car;
 
     void initWindow();
     void initPlayer();
+    void initVariables();
+
+    unsigned int nr_entities;
+    void initEntities(unsigned int nrEntities);
 };

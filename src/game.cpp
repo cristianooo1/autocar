@@ -1,4 +1,6 @@
 #include "game.h"
+#include <cstdlib>
+#include <ctime>
 
 void GameObj::initWindow()
 {
@@ -12,6 +14,12 @@ void GameObj::initWindow()
                         sf::Style::Titlebar | sf::Style::Close);
 
     this->window.setFramerateLimit(60);
+    this->window.setPosition(sf::Vector2i(1200, 150));
+}
+
+void GameObj::initVariables()
+{
+    this->nr_entities = 5;
 }
 
 void GameObj::initPlayer()
@@ -19,10 +27,27 @@ void GameObj::initPlayer()
     this->car = new Car();
 }
 
+void GameObj::initEntities(unsigned int nr_entities)
+{
+    // use current time as seed for random generator
+    std::srand(std::time({}));
+
+    for (int i = 0; i < nr_entities; i++)
+    {
+        std::shared_ptr<Entity> testEntity = EntityManager::Instance().CreateEntity("tree_test" + std::to_string(i));
+        float xPos = std::rand() % 500;
+        float yPos = std::rand() % 500;
+
+        testEntity->setPosition(xPos, yPos);
+    }
+}
+
 GameObj::GameObj()
 {
     this->initWindow();
+    this->initVariables();
     this->initPlayer();
+    this->initEntities(this->nr_entities);
 }
 
 GameObj::~GameObj()
@@ -83,11 +108,22 @@ void GameObj::update()
 
     this->updateCar();
     this->updateCarBoundaries(this->getWindow().getSize().x, this->getWindow().getSize().x);
+    this->updateEntities();
 }
 
 void GameObj::renderCar()
 {
     this->car->render(this->window);
+}
+
+void GameObj::renderEntities()
+{
+    EntityManager::Instance().renderAll(this->window);
+}
+
+void GameObj::updateEntities()
+{
+    EntityManager::Instance().updateEntities();
 }
 
 void GameObj::render()
@@ -96,6 +132,7 @@ void GameObj::render()
 
     // render game
     this->renderCar();
+    this->renderEntities();
 
     window.display();
 }

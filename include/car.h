@@ -17,8 +17,8 @@ public:
     void move(const float dir_x, const float dir_y);
 
     sf::Vector2f getSize() const;
-    const sf::Vector2f getPosition() const;
-    const sf::FloatRect getGlobalBounds() const;
+    sf::Vector2f getPosition() const;
+    sf::FloatRect getGlobalBounds() const;
 
     void updatePhysics();
     void updateMovement();

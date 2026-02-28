@@ -20,12 +20,12 @@ add_executable(${PROJECT_NAME}
     src/main.cpp 
     src/game.cpp
     src/car.cpp
-    src/obstacle.cpp
-    src/obstacleMap.cpp
+    src/entity.cpp
+    src/entityManager.cpp
     include/game.h
     include/car.h
-    include/obstacle.h
-    include/obstacleMap.h
+    include/entity.h
+    include/entityManager.h
     
 )
 
