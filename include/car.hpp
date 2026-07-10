@@ -7,8 +7,9 @@ public:
     Car();
     ~Car();
     void Draw();
-    void Update();
-    void Move();
+    void UpdatePosition();
+
+    void SetThrottle(float newThrottle);
 
 private:
     raylib::Rectangle car_rectangle;
@@ -17,5 +18,6 @@ private:
 
     raylib::Rectangle car_origin;
 
-    float speed;
+    float steering_angle;
+    float throttle;
 };

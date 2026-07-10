@@ -9,9 +9,9 @@ Car::Car()
 
     car_origin.SetSize(10.0f, 10.0f);
 
-    car_position = raylib::Vector2{25.0f, 25.0f};
+    car_position = raylib::Vector2{100.0f, 100.0f};
 
-    this->speed = 10.0;
+    this->throttle = 0.0;
 }
 
 Car::~Car()
@@ -32,35 +32,15 @@ void Car::Draw()
                     0.0f,
                     raylib::Color::Red());
 
-    std::cout << car_rectangle.x << " and " << car_rectangle.y << "\n";
+    // std::cout << car_rectangle.x << " and " << car_rectangle.y << "\n";
 }
 
-void Car::Update()
+void Car::SetThrottle(float newThrottle)
 {
-    this->Move();
+    this->throttle = newThrottle;
 }
 
-void Car::Move()
+void Car::UpdatePosition()
 {
-    if (IsKeyDown(KEY_RIGHT))
-    {
-        car_position.x += speed;
-        std::cout << "KEY_RIGHT pressed" << "\n";
-        std::cout << car_position.x << "\n";
-    }
-    if (IsKeyDown(KEY_LEFT))
-    {
-        car_position.x -= speed;
-        std::cout << "KEY_LEFT pressed" << "\n";
-    }
-    if (IsKeyDown(KEY_UP))
-    {
-        car_position.y -= speed;
-        std::cout << "KEY_UP pressed" << "\n";
-    }
-    if (IsKeyDown(KEY_DOWN))
-    {
-        car_position.y += speed;
-        std::cout << "KEY_DOWN pressed" << "\n";
-    }
+    car_position.y -= throttle;
 }

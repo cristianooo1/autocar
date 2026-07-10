@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include "car.hpp"
+#include "game.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     SetTargetFPS(60);
     raylib::Color background = raylib::Color::SkyBlue();
 
-    Car car1;
+    Game game;
 
     // MAIN GAME LOOP
     // 1. event handling e.g. key presses
@@ -22,12 +22,13 @@ int main(int argc, char *argv[])
     // 3. drawing objects on screen at the correct positions
     while (!window.ShouldClose())
     {
-        car1.Update();
+        game.HandleInput();
+
+        game.Update();
 
         window.BeginDrawing();
         window.ClearBackground(background);
-
-        car1.Draw();
+        game.Draw();
 
         window.EndDrawing();
     }
