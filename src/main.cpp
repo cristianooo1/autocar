@@ -15,11 +15,16 @@ int main(int argc, char *argv[])
     raylib::Color background = raylib::Color::SkyBlue();
 
     Car car1;
+
+    // MAIN GAME LOOP
+    // 1. event handling e.g. key presses
+    // 2. updating positions
+    // 3. drawing objects on screen at the correct positions
     while (!window.ShouldClose())
     {
         car1.Update();
-        window.BeginDrawing();
 
+        window.BeginDrawing();
         window.ClearBackground(background);
 
         car1.Draw();
