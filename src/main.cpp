@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     // 3. drawing objects on screen at the correct positions
     while (!window.ShouldClose())
     {
+
         game.HandleInput();
 
         game.Update();
