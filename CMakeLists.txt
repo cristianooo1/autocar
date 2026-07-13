@@ -36,7 +36,8 @@ endif()
 set(SOURCES 
     src/main.cpp
     src/car.cpp
-    src/game.cpp)
+    src/game.cpp
+    src/obstacle.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # where CMake looks for .hpp files

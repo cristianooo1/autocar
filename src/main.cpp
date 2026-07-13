@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     const int window_height = 450;
     std::string window_title = "main window";
 
-    raylib::Window window(window_width, window_width, window_title);
+    raylib::Window window(window_width, window_height, window_title);
     SetTargetFPS(60);
     raylib::Color background = raylib::Color::SkyBlue();
 
