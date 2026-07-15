@@ -1,23 +1,14 @@
 #include "car.hpp"
 
-Car::Car()
+Car::Car(raylib::Vector2 dimensions, raylib::Vector2 origin, raylib::Vector2 position)
+    : _carTransform{.position = position}, _carBB{.width = dimensions.x, .height = dimensions.y, .origin = origin}
 {
-    car_dimensions = raylib::Vector2(CAR_WIDTH, CAR_LENGTH);
-    car_rectangle.SetSize(car_dimensions);
-
-    car_origin_pos = raylib::Vector2(CAR_WIDTH / 2,
-                                     CAR_LENGTH * 2 / 3);
-    car_origin.SetSize(1.0f, 1.0f);
-
-    car_position = raylib::Vector2{100.0f, 100.0f};
-
     car_throttle = 10.0f;
     car_speed = 0.0f;
     car_brake = 0.97f;
     car_max_speed = 5.0f;
 
     car_direction = -1;
-    car_orientation = 0.0f;
 
     car_steering_angle = 0.0f;
     car_steering_angle_speed = 2.0f;
@@ -27,6 +18,64 @@ Car::Car()
 
 Car::~Car()
 {
+}
+
+void Car::Update()
+{
+
+    std::cout << "orient_deg: " << _carTransform.orientationDeg << "\n";
+
+    // 90deg offset for car_origin axes to match screen_origin axes!!!!!!!!!!!!
+    float radians = _carTransform.deg2rad(_carTransform.orientationDeg + 90.0f);
+
+    _carTransform.position.x += car_speed * std::cos(radians);
+    _carTransform.position.y += car_speed * std::sin(radians);
+
+    // upper wall
+    // if (_carTransform.position.y - (_carBB.height * 2 / 3) < 0)
+    // {
+    //     _carTransform.position.y = _carBB.height * 2 / 3;
+    // }
+
+    // // lower wall
+    // if (_carTransform.position.y + (_carBB.height / 3) > GetScreenHeight())
+    // {
+    //     _carTransform.position.y = GetScreenHeight() - _carBB.height / 3;
+    // }
+    // std::cout << "orientation: " << car_orientation << " Speed: " << car_speed << "\n";
+}
+
+void Car::Draw()
+{
+    float w = _carBB.width * _carTransform.scale;
+    float h = _carBB.height * _carTransform.scale;
+
+    raylib::Vector2 drawingPosition = {
+        _carTransform.position.x - w * (_carBB.width / 2),
+        _carTransform.position.y - h * (_carBB.height * 2 / 3),
+    };
+    car_draw_rec.x = _carTransform.position.x;
+    car_draw_rec.y = _carTransform.position.y;
+    car_draw_rec.width = _carBB.width;
+    car_draw_rec.height = _carBB.height;
+
+    DrawRectanglePro(car_draw_rec,
+                     _carBB.origin,
+                     this->_carTransform.orientationDeg,
+                     raylib::Color::White());
+
+    DrawCircle(_carTransform.position.x, _carTransform.position.y, 5.0f, raylib::Color::Red());
+    // std::cout << car_rectangle.x << " and " << car_rectangle.y << "\n";
+}
+
+raylib::Vector2 Car::GetCarPosition()
+{
+    return _carTransform.position;
+}
+
+std::vector<raylib::Vector2> Car::GetCarBoundaries()
+{
+    return _carBB.GetCorners(_carTransform);
 }
 
 void Car::SetThrottle(int direction, float dt)
@@ -80,47 +129,18 @@ void Car::SetSteering(int direction, float dt)
         }
     }
     car_steering_angle = car_steering_angle * (1 - car_steering_brake);
-    car_orientation += car_steering_angle;
+
+    this->_carTransform.orientationDeg += car_steering_angle;
+    if (this->_carTransform.orientationDeg > 360.0f)
+    {
+        this->_carTransform.orientationDeg -= 360.0f;
+    }
+    else if (this->_carTransform.orientationDeg < -360.0f)
+    {
+        this->_carTransform.orientationDeg += 360.0f;
+    }
 
     // std::cout << "dt from car: " << dt << "\n";
     // std::cout << "steering angle: " << car_steering_angle << "\n";
     // std::cout << "orientation: " << car_orientation << "\n";
-}
-
-void Car::UpdatePosition()
-{
-    // 90deg offset for car_origin axes to match screen_origin axes
-    float radians = PI * (car_orientation + 90) / 180;
-
-    car_position.x += car_speed * std::cos(radians);
-    car_position.y += car_speed * std::sin(radians);
-
-    // upper wall
-    if (car_position.y - (CAR_LENGTH * 2 / 3) < 0)
-    {
-        car_position.y = CAR_LENGTH * 2 / 3;
-    }
-
-    // lower wall
-    if (car_position.y + (CAR_LENGTH / 3) > GetScreenHeight())
-    {
-        car_position.y = GetScreenHeight() - CAR_LENGTH / 3;
-    }
-    // std::cout << "orientation: " << car_orientation << " Speed: " << car_speed << "\n";
-}
-
-void Car::Draw()
-{
-    car_rectangle.SetPosition(car_position);
-    car_origin.SetPosition(car_position);
-
-    car_rectangle.Draw({car_origin_pos.x, car_origin_pos.y},
-                       car_orientation,
-                       raylib::Color::Blue());
-
-    car_origin.Draw(raylib::Vector2(0, 0),
-                    0.0f,
-                    raylib::Color::Red());
-
-    // std::cout << car_rectangle.x << " and " << car_rectangle.y << "\n";
 }

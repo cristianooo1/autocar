@@ -5,6 +5,7 @@
 
 #include "car.hpp"
 #include "obstacle.hpp"
+#include "transform2D.hpp"
 
 class Game
 {
@@ -16,7 +17,6 @@ public:
     void HandleInput();
 
 private:
-    float dt;
     Car car;
     std::vector<Obstacle> obstacles;
     std::vector<Obstacle> CreateObstacles();
@@ -25,4 +25,7 @@ private:
     // for random number generation
     std::mt19937 mt{std::random_device{}()};
     std::uniform_real_distribution<> obstaclePos{0, 1};
+    float dt;
+
+    raylib::Vector2 CheckCollision();
 };

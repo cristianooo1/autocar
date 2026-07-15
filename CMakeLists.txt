@@ -37,7 +37,9 @@ set(SOURCES
     src/main.cpp
     src/car.cpp
     src/game.cpp
-    src/obstacle.cpp)
+    src/obstacle.cpp
+    src/transform2D.cpp
+    src/boundingBox2D.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # where CMake looks for .hpp files

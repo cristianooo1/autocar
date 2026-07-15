@@ -1,12 +1,13 @@
 #include "game.hpp"
 
-Game::Game()
-{
+const float CAR_WIDTH{50.0f};
+const float CAR_HEIGHT{90.0f};
 
+Game::Game() : car({50.0f, 90.0f}, {CAR_WIDTH / 2, CAR_HEIGHT * 2 / 3}, {10.0f, 10.0f})
+{
     obstacles = CreateObstacles();
 }
 
-// destructor ?
 Game::~Game()
 {
 }
@@ -19,11 +20,28 @@ void Game::Draw()
     {
         obstacle.Draw();
     }
+
+    // DrawCircleV({car.GetCarBoundaries().x, car.GetCarBoundaries().y}, 2.0f, raylib::Color::Purple());
+    // DrawCircleV({car.GetCarBoundaries().z, car.GetCarBoundaries().w}, 2.0f, raylib::Color::Black());
 }
 
 void Game::Update()
 {
-    car.UpdatePosition();
+    car.Update();
+    raylib::Vector2 coll_point = CheckCollision();
+    DrawCircleV({coll_point.x, coll_point.y}, 2.0f, raylib::Color::Red());
+    // std::cout << "coll x: " << coll_point.x << " y: " << coll_point.y << "\n";
+
+    // std::cout << "CAR_POS:x: " << car.GetCarPosition().x << " y: " << car.GetCarPosition().y << "\n";
+    // std::cout << "CAR_BOUND:TLx: "
+    //           << car.GetCarBoundaries().x
+    //           << " TLy: "
+    //           << car.GetCarBoundaries().y
+    //           << " BRx: "
+    //           << car.GetCarBoundaries().z
+    //           << " BRy: "
+    //           << car.GetCarBoundaries().w
+    //           << "\n";
 }
 
 void Game::HandleInput()
@@ -66,20 +84,34 @@ void Game::HandleInput()
 std::vector<Obstacle> Game::CreateObstacles()
 {
     std::vector<Obstacle> obstacles;
-    for (int count{1}; count < 100; count++)
-    {
+    // for (int count{1}; count < 2; count++)
+    // {
 
-        float x = Lerp(0.0f, 800.0f, obstaclePos(mt));
-        float y = Lerp(0.0f, 450.0f, obstaclePos(mt));
+    //     float x = Lerp(0.0f, 800.0f, obstaclePos(mt));
+    //     float y = Lerp(0.0f, 450.0f, obstaclePos(mt));
 
-        int test = static_cast<int>(std::round(x));
-        std::cout << x << ", " << y << "\n";
+    //     int test = static_cast<int>(std::round(x));
+    //     std::cout << x << ", " << y << "\n";
 
-        if (test % 2 == 0)
-            obstacles.push_back(Obstacle(1, {x, y}));
-        else
-            obstacles.push_back(Obstacle(2, {x, y}));
-    }
+    //     if (test % 2 == 0)
+    //         obstacles.push_back(Obstacle(1, {x, y}));
+    //     else
+    //         obstacles.push_back(Obstacle(2, {x, y}));
+    // }
 
+    obstacles.push_back(Obstacle(2, {400, 200}));
     return obstacles;
+}
+
+raylib::Vector2 Game::CheckCollision()
+{
+
+    raylib::Vector2 coll;
+    CheckCollisionLines({car.GetCarBoundaries()[0].x, car.GetCarBoundaries()[0].y},
+                        {car.GetCarBoundaries()[1].x, car.GetCarBoundaries()[1].y},
+                        {400.0f, 200.0f},
+                        {440.0f, 200.0f},
+                        &coll);
+
+    return coll;
 }

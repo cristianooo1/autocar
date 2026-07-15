@@ -1,31 +1,31 @@
 #pragma once
-#include "raylib-cpp.hpp"
 #include <iostream>
 #include <string>
 #include <cmath>
 #include <numbers>
 
+#include "raylib-cpp.hpp"
+#include "transform2D.hpp"
+#include "boundingBox2D.hpp"
+
 class Car
 {
 public:
-    Car();
+    Car(raylib::Vector2 dimensions, raylib::Vector2 origin, raylib::Vector2 position);
     ~Car();
     void Draw();
-    void UpdatePosition();
+    void Update();
 
     void SetThrottle(int direction, float dt);
     void SetSteering(int direction, float dt);
 
+    raylib::Vector2 GetCarPosition();
+    std::vector<raylib::Vector2> GetCarBoundaries();
+
 private:
-    raylib::Rectangle car_rectangle;
-
-    const float CAR_WIDTH = 50.0f;
-    const float CAR_LENGTH = 100.0f;
-    raylib::Vector2 car_dimensions;
-    raylib::Vector2 car_position;
-
-    raylib::Rectangle car_origin;
-    raylib::Vector2 car_origin_pos;
+    Transform2D _carTransform;
+    BoundingBox2D _carBB;
+    Rectangle car_draw_rec;
 
     float car_speed;
     float car_throttle;
@@ -33,7 +33,6 @@ private:
     float car_max_speed;
 
     int car_direction;
-    float car_orientation;
 
     float car_steering_angle;
     float car_steering_angle_speed;

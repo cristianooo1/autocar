@@ -1,4 +1,3 @@
-// #include "raylib-cpp.hpp"
 #include <iostream>
 #include <string>
 
@@ -17,9 +16,9 @@ int main(int argc, char *argv[])
     Game game;
 
     // MAIN GAME LOOP
-    // 1. event handling e.g. key presses
-    // 2. updating positions
-    // 3. drawing objects on screen at the correct positions
+    // 1. event handling
+    // 2. update positions
+    // 3. drawing objects
     while (!window.ShouldClose())
     {
 
