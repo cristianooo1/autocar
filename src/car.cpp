@@ -23,7 +23,7 @@ Car::~Car()
 void Car::Update()
 {
 
-    std::cout << "orient_deg: " << _carTransform.orientationDeg << "\n";
+    // std::cout << "orient_deg: " << _carTransform.orientationDeg << "\n";
 
     // 90deg offset for car_origin axes to match screen_origin axes!!!!!!!!!!!!
     float radians = _carTransform.deg2rad(_carTransform.orientationDeg + 90.0f);
@@ -54,12 +54,12 @@ void Car::Draw()
         _carTransform.position.x - w * (_carBB.width / 2),
         _carTransform.position.y - h * (_carBB.height * 2 / 3),
     };
-    car_draw_rec.x = _carTransform.position.x;
-    car_draw_rec.y = _carTransform.position.y;
-    car_draw_rec.width = _carBB.width;
-    car_draw_rec.height = _carBB.height;
+    _car_draw_rec.x = _carTransform.position.x;
+    _car_draw_rec.y = _carTransform.position.y;
+    _car_draw_rec.width = _carBB.width;
+    _car_draw_rec.height = _carBB.height;
 
-    DrawRectanglePro(car_draw_rec,
+    DrawRectanglePro(_car_draw_rec,
                      _carBB.origin,
                      this->_carTransform.orientationDeg,
                      raylib::Color::White());

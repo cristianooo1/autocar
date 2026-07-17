@@ -2,18 +2,21 @@
 #include <string>
 
 #include "game.hpp"
+#include "projectConfig.hpp"
+
+#include "mapGenerator.hpp"
 
 int main(int argc, char *argv[])
 {
-    const int window_width = 800;
-    const int window_height = 450;
+
     std::string window_title = "main window";
 
-    raylib::Window window(window_width, window_height, window_title);
+    raylib::Window window(ProjectConfig::WINDOW_WIDTH, ProjectConfig::WINDOW_HEIGHT, window_title);
     SetTargetFPS(60);
     raylib::Color background = raylib::Color::SkyBlue();
 
-    Game game;
+    // Game game(window.GetWidth(), window.GetHeight());
+    Game game(20, 20);
 
     // MAIN GAME LOOP
     // 1. event handling

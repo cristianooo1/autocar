@@ -25,7 +25,7 @@ public:
 private:
     Transform2D _carTransform;
     BoundingBox2D _carBB;
-    Rectangle car_draw_rec;
+    Rectangle _car_draw_rec;
 
     float car_speed;
     float car_throttle;

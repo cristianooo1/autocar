@@ -3,9 +3,17 @@
 const float CAR_WIDTH{50.0f};
 const float CAR_HEIGHT{90.0f};
 
-Game::Game() : car({50.0f, 90.0f}, {CAR_WIDTH / 2, CAR_HEIGHT * 2 / 3}, {10.0f, 10.0f})
+Game::Game(int mapWidth, int mapHeight)
+    : _mapGenerator(mapWidth, mapHeight, 5, 2, 40),
+      _car({50.0f, 90.0f},
+           {CAR_WIDTH / 2, CAR_HEIGHT * 2 / 3},
+           {10.0f, 10.0f})
 {
+
     obstacles = CreateObstacles();
+
+    _mapGenerator.initMap();
+    _mapGenerator.printMap();
 }
 
 Game::~Game()
@@ -14,7 +22,7 @@ Game::~Game()
 
 void Game::Draw()
 {
-    car.Draw();
+    _car.Draw();
 
     for (auto &obstacle : obstacles)
     {
@@ -27,7 +35,7 @@ void Game::Draw()
 
 void Game::Update()
 {
-    car.Update();
+    _car.Update();
     raylib::Vector2 coll_point = CheckCollision();
     DrawCircleV({coll_point.x, coll_point.y}, 2.0f, raylib::Color::Red());
     // std::cout << "coll x: " << coll_point.x << " y: " << coll_point.y << "\n";
@@ -52,32 +60,32 @@ void Game::HandleInput()
     // LINEAR SPEED
     if (IsKeyDown(KEY_UP))
     {
-        car.SetThrottle(-1, dt);
+        _car.SetThrottle(-1, dt);
         std::cout << "KEY_UP " << "\n";
     }
     else if (IsKeyDown(KEY_DOWN))
     {
-        car.SetThrottle(1, dt);
+        _car.SetThrottle(1, dt);
         std::cout << "KEY_DOWN " << "\n";
     }
     else
     {
-        car.SetThrottle(0, dt);
+        _car.SetThrottle(0, dt);
         // std::cout << "NOTHING up/dow`n " << "\n";
     }
 
     // ANGULAR ROTATION
     if (IsKeyDown(KEY_LEFT))
     {
-        car.SetSteering(-1, dt);
+        _car.SetSteering(-1, dt);
         std::cout << "KEY_LEFT " << "\n";
     }
     if (IsKeyDown(KEY_RIGHT))
     {
-        car.SetSteering(1, dt);
+        _car.SetSteering(1, dt);
         std::cout << "KEY_RIGHT " << "\n";
     }
-    car.SetSteering(0, dt);
+    _car.SetSteering(0, dt);
     // std::cout << "always " << "\n";
 }
 
@@ -105,10 +113,9 @@ std::vector<Obstacle> Game::CreateObstacles()
 
 raylib::Vector2 Game::CheckCollision()
 {
-
     raylib::Vector2 coll;
-    CheckCollisionLines({car.GetCarBoundaries()[0].x, car.GetCarBoundaries()[0].y},
-                        {car.GetCarBoundaries()[1].x, car.GetCarBoundaries()[1].y},
+    CheckCollisionLines({_car.GetCarBoundaries()[0].x, _car.GetCarBoundaries()[0].y},
+                        {_car.GetCarBoundaries()[1].x, _car.GetCarBoundaries()[1].y},
                         {400.0f, 200.0f},
                         {440.0f, 200.0f},
                         &coll);

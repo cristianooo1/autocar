@@ -6,18 +6,21 @@
 #include "car.hpp"
 #include "obstacle.hpp"
 #include "transform2D.hpp"
+#include "mapGenerator.hpp"
+#include "projectConfig.hpp"
 
 class Game
 {
 public:
-    Game();
+    Game(int mapWidth, int mapHeight);
     ~Game();
     void Draw();
     void Update();
     void HandleInput();
 
 private:
-    Car car;
+    MapGenerator _mapGenerator;
+    Car _car;
     std::vector<Obstacle> obstacles;
     std::vector<Obstacle> CreateObstacles();
 
