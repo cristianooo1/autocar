@@ -21,6 +21,8 @@ public:
 private:
     MapGenerator _mapGenerator;
     Car _car;
+    std::vector<int> map;
+    std::vector<MapGenerator::Line> _boundaries;
     std::vector<Obstacle> obstacles;
     std::vector<Obstacle> CreateObstacles();
 

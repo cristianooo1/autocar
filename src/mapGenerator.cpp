@@ -1,11 +1,12 @@
 #include "mapGenerator.hpp"
 
-MapGenerator::MapGenerator(int width, int height, int rule1, int rule2, int fillprob)
+MapGenerator::MapGenerator(int width, int height, int rule1, int rule2, int fillprob, int nr_generations)
     : map_width{width},
       map_height{height},
       r1_cutoff{rule1},
       r2_cutoff{rule2},
-      fillProb{fillprob}
+      fillProb{fillprob},
+      generations{nr_generations}
 {
 }
 
@@ -132,13 +133,7 @@ void MapGenerator::generationStep()
     }
 
     // update the read buffer with the calculated state
-    for (idy = 1; idy < map_height - 1; idy++)
-    {
-        for (idx = 1; idx < map_width - 1; idx++)
-        {
-            grid1[idy * map_width + idx] = grid2[idy * map_width + idx];
-        }
-    }
+    std::swap(grid1, grid2);
 }
 
 void MapGenerator::printMap()
@@ -151,4 +146,15 @@ void MapGenerator::printMap()
         }
         std::cout << "\n";
     }
+}
+
+std::vector<int> MapGenerator::generateMap()
+{
+    initMap();
+    for (int i = 0; i < generations; i++)
+    {
+        generationStep();
+    }
+    printMap();
+    return grid1;
 }

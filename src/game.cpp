@@ -4,7 +4,7 @@ const float CAR_WIDTH{50.0f};
 const float CAR_HEIGHT{90.0f};
 
 Game::Game(int mapWidth, int mapHeight)
-    : _mapGenerator(mapWidth, mapHeight, 5, 2, 40),
+    : _mapGenerator(mapWidth, mapHeight, 5, 2, 40, 3),
       _car({50.0f, 90.0f},
            {CAR_WIDTH / 2, CAR_HEIGHT * 2 / 3},
            {10.0f, 10.0f})
@@ -12,8 +12,8 @@ Game::Game(int mapWidth, int mapHeight)
 
     obstacles = CreateObstacles();
 
-    _mapGenerator.initMap();
-    _mapGenerator.printMap();
+    this->map = _mapGenerator.generateMap();
+    _mapGenerator.drawBoundary(map, this->_boundaries);
 }
 
 Game::~Game()
@@ -22,6 +22,10 @@ Game::~Game()
 
 void Game::Draw()
 {
+    for (const MapGenerator::Line &line : _boundaries)
+    {
+        DrawLineBezier(line.start, line.end, 3.0f, raylib::Color::Pink());
+    }
     _car.Draw();
 
     for (auto &obstacle : obstacles)

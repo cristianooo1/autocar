@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     raylib::Color background = raylib::Color::SkyBlue();
 
     // Game game(window.GetWidth(), window.GetHeight());
-    Game game(20, 20);
+    Game game(80, 80);
 
     // MAIN GAME LOOP
     // 1. event handling

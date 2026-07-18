@@ -3,6 +3,6 @@
 namespace ProjectConfig
 {
     constexpr int WINDOW_WIDTH = 800;
-    constexpr int WINDOW_HEIGHT = 450;
+    constexpr int WINDOW_HEIGHT = 800;
 
 }

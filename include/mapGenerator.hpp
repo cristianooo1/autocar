@@ -13,7 +13,7 @@
 class MapGenerator
 {
 public:
-    MapGenerator(int width, int height, int rule1, int rule2, int fillprob);
+    MapGenerator(int width, int height, int rule1, int rule2, int fillprob, int nr_generations);
     ~MapGenerator();
 
     int pickRand();
@@ -24,14 +24,155 @@ public:
 
     void printMap();
 
+    std::vector<int> generateMap();
+
+    struct Vertex
+    {
+        float x;
+        float y;
+    };
+
+    struct Corner
+    {
+        Vertex position;
+        Vertex verticalEdge;
+        Vertex horizontalEdge;
+    };
+
+    struct Square
+    {
+        Corner corner1;
+        Corner corner2;
+        Corner corner3;
+        Corner corner4;
+    };
+
+    struct Line
+    {
+        raylib::Vector2 start;
+        raylib::Vector2 end;
+    };
+
+    raylib::Vector2 midPoint(Vertex start, Vertex end)
+    {
+        float scale = 10.0f;
+        float x1 = start.x;
+        float y1 = start.y;
+        float x2 = end.x;
+        float y2 = end.y;
+        return {
+            (x1 + ((x2 - x1) / 2.0f)) * scale,
+            (y1 + ((y2 - y1) / 2.0f)) * scale};
+    };
+
+    void getCorner(float x, float y, std::vector<Corner> &corners)
+    {
+        const Vertex A{x, y};
+        const Vertex B{x + 1, y};
+        const Vertex C{x + 1, y + 1};
+        const Vertex D{x, y + 1};
+
+        corners.push_back(Corner{.position = A, .verticalEdge = D, .horizontalEdge = B});
+        corners.push_back(Corner{.position = B, .verticalEdge = C, .horizontalEdge = A});
+        corners.push_back(Corner{.position = C, .verticalEdge = B, .horizontalEdge = D});
+        corners.push_back(Corner{.position = D, .verticalEdge = A, .horizontalEdge = C});
+    };
+
+    // marching squares approach
+    // https://chrisakroyd.com/blog/marching-squares/
+    void drawBoundary(const std::vector<int> &grid, std::vector<Line> &_boundaryLines)
+    {
+        int idx, idy;
+
+        for (idy = 1; idy < map_height - 1; idy++)
+        {
+            for (idx = 1; idx < map_width - 1; idx++)
+            {
+                std::vector<Corner> cornerss;
+                std::vector<Corner> above;
+                std::vector<Corner> below;
+                float x = idx;
+                float y = idy;
+                getCorner(x, y, cornerss);
+
+                for (const auto &corner : cornerss)
+                {
+                    const Vertex pos = corner.position;
+                    if (grid[pos.y * map_width + pos.x] != 0)
+                    {
+                        above.push_back(corner);
+                    }
+                    else
+                    {
+                        below.push_back(corner);
+                    }
+                }
+
+                // case 0 and 15: nothing
+                // cases 1,2,4,7,8,11,13,14:
+
+                if (above.size() == 1 || below.size() == 1)
+                {
+                    Corner cornerr;
+                    if (above.size() == 1)
+                        cornerr = above[0];
+                    else
+                    {
+                        cornerr = below[0];
+                    }
+
+                    _boundaryLines.push_back(Line{.start = midPoint(cornerr.position, cornerr.verticalEdge),
+                                                  .end = midPoint(cornerr.position, cornerr.horizontalEdge)});
+                }
+
+                if (above.size() == 2)
+                {
+                    Corner corner1;
+                    Corner corner2;
+                    corner1 = above[0];
+                    corner2 = above[1];
+
+                    float x1 = corner1.position.x;
+                    float y1 = corner1.position.y;
+                    float x2 = corner2.position.x;
+                    float y2 = corner2.position.y;
+
+                    if (x1 == x2 && y1 != y2)
+                    {
+                        // cases 6 and 9:
+                        _boundaryLines.push_back(Line{
+                            .start = midPoint({x1, y1}, corner1.horizontalEdge),
+                            .end = midPoint({x2, y2}, corner2.horizontalEdge)});
+                    }
+                    else if (x1 != x2 && y1 == y2)
+                    {
+                        // cases 3 and 12:
+                        _boundaryLines.push_back(Line{
+                            .start = midPoint({x1, y1}, corner1.verticalEdge),
+                            .end = midPoint({x2, y2}, corner2.verticalEdge)});
+                    }
+                    else if (x1 != x2 && y1 != y2)
+                    {
+                        // cases 5 and 10:
+                        _boundaryLines.push_back(Line{
+                            .start = midPoint({x1, y1}, corner1.horizontalEdge),
+                            .end = midPoint({x2, y2}, corner2.verticalEdge)});
+                        _boundaryLines.push_back(Line{
+                            .start = midPoint({x1, y1}, corner1.verticalEdge),
+                            .end = midPoint({x2, y2}, corner2.horizontalEdge)});
+                    }
+                }
+            }
+        }
+    };
+
 private:
     int map_width{};
     int map_height{};
     int r1_cutoff{5};
     int r2_cutoff{2};
     int fillProb{40};
-
-    int length = map_width * map_height;
+    int generations{3};
 
     // read/write buffer with 2 grids
     // grid1: read buffer = current state of map
