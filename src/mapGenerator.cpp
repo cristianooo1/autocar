@@ -1,8 +1,9 @@
 #include "mapGenerator.hpp"
 
-MapGenerator::MapGenerator(int width, int height, int rule1, int rule2, int fillprob, int nr_generations)
+MapGenerator::MapGenerator(int width, int height, float scale, int rule1, int rule2, int fillprob, int nr_generations)
     : map_width{width},
       map_height{height},
+      _scale{scale},
       r1_cutoff{rule1},
       r2_cutoff{rule2},
       fillProb{fillprob},
@@ -148,7 +149,7 @@ void MapGenerator::printMap()
     }
 }
 
-std::vector<int> MapGenerator::generateMap()
+std::vector<int> MapGenerator::generate2DGrid()
 {
     initMap();
     for (int i = 0; i < generations; i++)

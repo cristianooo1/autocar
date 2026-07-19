@@ -13,7 +13,7 @@
 class MapGenerator
 {
 public:
-    MapGenerator(int width, int height, int rule1, int rule2, int fillprob, int nr_generations);
+    MapGenerator(int width, int height, float scale, int rule1, int rule2, int fillprob, int nr_generations);
     ~MapGenerator();
 
     int pickRand();
@@ -24,12 +24,12 @@ public:
 
     void printMap();
 
-    std::vector<int> generateMap();
+    std::vector<int> generate2DGrid();
 
     struct Vertex
     {
-        float x;
-        float y;
+        int x;
+        int y;
     };
 
     struct Corner
@@ -55,17 +55,16 @@ public:
 
     raylib::Vector2 midPoint(Vertex start, Vertex end)
     {
-        float scale = 10.0f;
         float x1 = start.x;
         float y1 = start.y;
         float x2 = end.x;
         float y2 = end.y;
         return {
-            (x1 + ((x2 - x1) / 2.0f)) * scale,
-            (y1 + ((y2 - y1) / 2.0f)) * scale};
+            (x1 + ((x2 - x1) / 2.0f)) * _scale,
+            (y1 + ((y2 - y1) / 2.0f)) * _scale};
     };
 
-    void getCorner(float x, float y, std::vector<Corner> &corners)
+    void getCorner(int x, int y, std::vector<Corner> &corners)
     {
         const Vertex A{x, y};
         const Vertex B{x + 1, y};
@@ -80,19 +79,20 @@ public:
 
     // marching squares approach
     // https://chrisakroyd.com/blog/marching-squares/
-    void drawBoundary(const std::vector<int> &grid, std::vector<Line> &_boundaryLines)
+    void getBoundaryEdges(const std::vector<int> &grid, std::vector<Line> &_boundaryLines)
     {
         int idx, idy;
 
-        for (idy = 1; idy < map_height - 1; idy++)
+        for (idy = 0; idy < map_height - 1; idy++)
         {
-            for (idx = 1; idx < map_width - 1; idx++)
+            for (idx = 0; idx < map_width - 1; idx++)
             {
                 std::vector<Corner> cornerss;
                 std::vector<Corner> above;
                 std::vector<Corner> below;
-                float x = idx;
-                float y = idy;
+
+                int x = idx;
+                int y = idy;
                 getCorner(x, y, cornerss);
 
                 for (const auto &corner : cornerss)
@@ -132,10 +132,10 @@ public:
                     corner1 = above[0];
                     corner2 = above[1];
 
-                    float x1 = corner1.position.x;
-                    float y1 = corner1.position.y;
-                    float x2 = corner2.position.x;
-                    float y2 = corner2.position.y;
+                    int x1 = corner1.position.x;
+                    int y1 = corner1.position.y;
+                    int x2 = corner2.position.x;
+                    int y2 = corner2.position.y;
 
                     if (x1 == x2 && y1 != y2)
                     {
@@ -166,9 +166,36 @@ public:
         }
     };
 
+    // void removeBoundaryDuplicates(const std::vector<Line> &_boundaryLines, std::vector<Line> &_newBoundary)
+    // {
+
+    //     for (auto idx = 1; idx < _boundaryLines.size(); idx++)
+    //     {
+    //         const int dx1 = _boundaryLines[idx].start.x - _boundaryLines[idx - 1].start.x;
+    //         const int dy1 = _boundaryLines[idx].start.y - _boundaryLines[idx - 1].start.y;
+
+    //         const int dx2 = _boundaryLines[idx].end.x - _boundaryLines[idx].start.x;
+    //         const int dy2 = _boundaryLines[idx].end.y - _boundaryLines[idx].start.y;
+
+    //         float m1 = std::sqrt(dx1 * dx1 + dy1 * dy1);
+    //         float m2 = std::sqrt(dx2 * dx2 + dy2 * dy2);
+
+    //         // in rad
+    //         float theta = std::acos((dx1 * dx2 + dy1 * dy2) / (m1 * m2));
+
+    //         if (theta < 0.175f)
+    //         {
+    //             raylib::Vector2 Start = _boundaryLines[idx - 1].start;
+    //             raylib::Vector2 End = _boundaryLines[idx].end;
+    //             _newBoundary.push_back(Line{.start = Start, .end = End});
+    //         }
+    //     }
+    // };
+
 private:
     int map_width{};
     int map_height{};
+    float _scale{10.0f};
     int r1_cutoff{5};
     int r2_cutoff{2};
     int fillProb{40};

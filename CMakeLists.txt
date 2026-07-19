@@ -40,7 +40,8 @@ set(SOURCES
     src/obstacle.cpp
     src/transform2D.cpp
     src/boundingBox2D.cpp
-    src/mapGenerator.cpp)
+    src/mapGenerator.cpp
+    src/rayCasting.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # where CMake looks for .hpp files

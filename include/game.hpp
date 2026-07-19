@@ -8,6 +8,7 @@
 #include "transform2D.hpp"
 #include "mapGenerator.hpp"
 #include "projectConfig.hpp"
+#include "rayCasting.hpp"
 
 class Game
 {
@@ -21,16 +22,21 @@ public:
 private:
     MapGenerator _mapGenerator;
     Car _car;
-    std::vector<int> map;
+    std::vector<int> grid2D;
     std::vector<MapGenerator::Line> _boundaries;
     std::vector<Obstacle> obstacles;
     std::vector<Obstacle> CreateObstacles();
+    RayCasting _lidar;
+
+    int game_window_width;
+    int game_window_height;
 
     // instantiate 32-bit Mersenne Twister
     // for random number generation
     std::mt19937 mt{std::random_device{}()};
     std::uniform_real_distribution<> obstaclePos{0, 1};
     float dt;
+    bool IsMousePressed;
 
     raylib::Vector2 CheckCollision();
 };
