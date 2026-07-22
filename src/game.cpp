@@ -1,13 +1,18 @@
 #include "game.hpp"
 
-const float CAR_WIDTH{50.0f};
-const float CAR_HEIGHT{90.0f};
-
 Game::Game(int mapWidth, int mapHeight)
-    : _mapGenerator(mapWidth, mapHeight, 40.0f, 5, 2, 60, 3),
-      _car({50.0f, 90.0f},
-           {CAR_WIDTH / 2, CAR_HEIGHT * 2 / 3},
-           {10.0f, 10.0f})
+    : _mapGenerator(
+          mapWidth,
+          mapHeight,
+          120.0f, // scale
+          6,      // rule1
+          2,      // rule2
+          10,     // fill probability
+          4),     // number of generations
+      _car(
+          {ProjectConfig::CAR_WIDTH, ProjectConfig::CAR_HEIGHT},             // dimensions
+          {ProjectConfig::CAR_WIDTH / 2, ProjectConfig::CAR_HEIGHT * 2 / 3}, // origin
+          {100.0f, 100.0f})                                                  // position
 {
     this->game_window_width = mapWidth;
     this->game_window_height = mapHeight;
@@ -16,13 +21,7 @@ Game::Game(int mapWidth, int mapHeight)
 
     // GENERATE MAP
     this->grid2D = _mapGenerator.generate2DGrid();
-    // this->_boundaries will be a vector with all the edges/lines of the map
     _mapGenerator.getBoundaryEdges(this->grid2D, this->_boundaries);
-    // this->_boundaries.push_back(MapGenerator::Line{
-    //     .start = {0, 0},
-    //     .end = {static_cast<float>(ProjectConfig::WINDOW_WIDTH), 0},
-
-    // });
 }
 
 Game::~Game()
@@ -31,42 +30,33 @@ Game::~Game()
 
 void Game::Draw()
 {
-    // DrawLineEx({0, 0}, {static_cast<float>(ProjectConfig::WINDOW_WIDTH), 0}, 3.0f, raylib::Color::Green());
-
     // MAP DRAW
-    int idx = 0;
-    for (const MapGenerator::Line &line : _boundaries)
-
+    if (_boundaries.size() >= 1)
     {
 
-        DrawLineEx(line.start, line.end, 3.0f, raylib::Color::Pink());
-        // DrawCircleLinesV(line.start, 30.0f, raylib::Color::Black());
-        // DrawText(TextFormat("s:%i", idx), line.start.x - 20, line.start.y - 20, 20, RED);
-
-        // DrawCircleLinesV(line.end, 10.0f, raylib::Color::White());
-        // DrawText(TextFormat("e:%i", idx), line.end.x + 20, line.end.y + 20, 20, RED);
-        idx++;
+        for (const MapGenerator::Line &line : _boundaries)
+        {
+            DrawLineEx(line.start, line.end, 3.0f, raylib::Color::Pink());
+        }
     }
-    idx = 0;
 
     // CAR DRAW
     _car.Draw();
+    DrawText(TextFormat("%02.03f", _car.GetCarOrientationRad()), _car.GetCarPosition().x - 15, _car.GetCarPosition().y, 20, RED);
+    DrawText(TextFormat("car_pos: x=%02.02f, y=%02.02f", _car.GetCarPosition().x, _car.GetCarPosition().y), 0, GetScreenHeight() - 30, 20, RED);
+
+    // LIDAR DRAW
+    if (this->IsMousePressed)
+    {
+        _lidar.getLidarRays(_car.GetCarPosition().x, _car.GetCarPosition().y, PI / 3.0f, 100.0f, _car.GetCarOrientationRad(), _boundaries);
+        _lidar.DrawLidarRays(_car.GetCarPosition(), _car.GetCarOrientationRad());
+    }
 
     // OBSTACLE DRAW
     // for (auto &obstacle : obstacles)
     // {
     //     obstacle.Draw();
     // }
-
-    // RAY CASTING DRAW
-    if (this->IsMousePressed)
-    {
-        _lidar.calculateVisibilityPolygon(_car.GetCarPosition().x, _car.GetCarPosition().y, 1000.0f, _boundaries);
-        _lidar.Draw(_car.GetCarPosition());
-        int total_rays = _lidar.getNumberRays().rayCast;
-        int unique_rays = _lidar.getNumberRays().rayCastUnique;
-        std::cout << "total_rays: " << total_rays << " unique_rays: " << unique_rays << "\n";
-    }
 }
 
 void Game::Update()
@@ -74,18 +64,6 @@ void Game::Update()
     _car.Update();
     // raylib::Vector2 coll_point = CheckCollision();
     // DrawCircleV({coll_point.x, coll_point.y}, 2.0f, raylib::Color::Red());
-    // std::cout << "coll x: " << coll_point.x << " y: " << coll_point.y << "\n";
-
-    // std::cout << "CAR_POS:x: " << car.GetCarPosition().x << " y: " << car.GetCarPosition().y << "\n";
-    // std::cout << "CAR_BOUND:TLx: "
-    //           << car.GetCarBoundaries().x
-    //           << " TLy: "
-    //           << car.GetCarBoundaries().y
-    //           << " BRx: "
-    //           << car.GetCarBoundaries().z
-    //           << " BRy: "
-    //           << car.GetCarBoundaries().w
-    //           << "\n";
 }
 
 void Game::HandleInput()
@@ -97,12 +75,12 @@ void Game::HandleInput()
     if (IsKeyDown(KEY_UP))
     {
         _car.SetThrottle(-1, dt);
-        std::cout << "KEY_UP " << "\n";
+        // std::cout << "KEY_UP " << "\n";
     }
     else if (IsKeyDown(KEY_DOWN))
     {
         _car.SetThrottle(1, dt);
-        std::cout << "KEY_DOWN " << "\n";
+        // std::cout << "KEY_DOWN " << "\n";
     }
     else
     {
@@ -114,12 +92,12 @@ void Game::HandleInput()
     if (IsKeyDown(KEY_LEFT))
     {
         _car.SetSteering(-1, dt);
-        std::cout << "KEY_LEFT " << "\n";
+        // std::cout << "KEY_LEFT " << "\n";
     }
     if (IsKeyDown(KEY_RIGHT))
     {
         _car.SetSteering(1, dt);
-        std::cout << "KEY_RIGHT " << "\n";
+        // std::cout << "KEY_RIGHT " << "\n";
     }
     _car.SetSteering(0, dt);
     // std::cout << "always " << "\n";
@@ -131,6 +109,11 @@ void Game::HandleInput()
     else
     {
         this->IsMousePressed = false;
+    }
+
+    if (IsKeyDown(KEY_H))
+    {
+        _car.SetPosition(100.0f, 100.0f);
     }
 }
 

@@ -65,7 +65,6 @@ void Car::Draw()
                      raylib::Color::White());
 
     DrawCircle(_carTransform.position.x, _carTransform.position.y, 5.0f, raylib::Color::Red());
-    // std::cout << car_rectangle.x << " and " << car_rectangle.y << "\n";
 }
 
 raylib::Vector2 Car::GetCarPosition()
@@ -76,6 +75,11 @@ raylib::Vector2 Car::GetCarPosition()
 std::vector<raylib::Vector2> Car::GetCarBoundaries()
 {
     return _carBB.GetCorners(_carTransform);
+}
+
+float Car::GetCarOrientationRad()
+{
+    return _carTransform.deg2rad(_carTransform.orientationDeg);
 }
 
 void Car::SetThrottle(int direction, float dt)
@@ -104,8 +108,6 @@ void Car::SetThrottle(int direction, float dt)
             car_speed = 0.0f;
         }
     }
-    // std::cout << "dt from car: " << dt << "\n";
-    // std::cout << "Direction: " << direction << " Speed: " << car_speed << "\n";
 }
 
 void Car::SetSteering(int direction, float dt)
@@ -131,16 +133,21 @@ void Car::SetSteering(int direction, float dt)
     car_steering_angle = car_steering_angle * (1 - car_steering_brake);
 
     this->_carTransform.orientationDeg += car_steering_angle;
-    if (this->_carTransform.orientationDeg > 360.0f)
+    if (this->_carTransform.orientationDeg > 180.0f)
     {
         this->_carTransform.orientationDeg -= 360.0f;
     }
-    else if (this->_carTransform.orientationDeg < -360.0f)
+    else if (this->_carTransform.orientationDeg < -180.0f)
     {
         this->_carTransform.orientationDeg += 360.0f;
     }
+}
 
-    // std::cout << "dt from car: " << dt << "\n";
-    // std::cout << "steering angle: " << car_steering_angle << "\n";
-    // std::cout << "orientation: " << car_orientation << "\n";
+void Car::SetPosition(float x, float y)
+{
+    this->_carTransform.position.x = x;
+    this->_carTransform.position.y = y;
+    this->_carTransform.orientationDeg = 0.0f;
+    this->car_speed = 0.0f;
+    this->car_steering_angle = 0.0f;
 }

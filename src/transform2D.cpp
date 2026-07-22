@@ -2,5 +2,5 @@
 
 float Transform2D::deg2rad(float orientation_deg)
 {
-    return (PI * orientation_deg / 180);
+    return (PI * orientation_deg / 180.0f);
 }

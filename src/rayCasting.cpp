@@ -10,6 +10,8 @@ RayCasting::~RayCasting()
 
 void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, std::vector<MapGenerator::Line> &_edges)
 {
+    // ox and oy: ORIGIN = center point from where rays are shot from
+
     // must clear to prevent memory reallocation
     this->vectorPolygons.clear();
 
@@ -56,6 +58,7 @@ void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, st
 
                 float min_t1 = INFINITY;
                 float min_px = 0.0f, min_py = 0.0f, min_ang = 0.0f;
+                float localDist = 0.0f;
                 bool isValid = false;
 
                 for (const MapGenerator::Line &_edge2 : _edges)
@@ -88,6 +91,7 @@ void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, st
                                 min_t1 = t1;
                                 min_px = ox + rdx * t1;
                                 min_py = oy + rdy * t1;
+                                localDist = t1 * radius;
                                 min_ang = std::atan2(min_py - oy, min_px - ox);
                                 isValid = true;
                             }
@@ -95,24 +99,33 @@ void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, st
                     }
                 }
 
-                // add intersection to polygon vector
-                // only if ray hit something
+                // if (!isValid)
+                // {
+                //     min_px = ox + rdx;
+                //     min_py = oy + rdy;
+                //     localDist = radius;
+                //     min_ang = std::atan2(min_py - oy, min_px - ox);
+                //     isValid = true;
+                // }
+
                 if (isValid)
                 {
+                    // float theta_norm = min_ang + (PI * 90.0f / 180.0f);
+                    float theta_norm = min_ang;
+                    if (theta_norm > PI)
+                    {
+                        theta_norm -= (2.0f * PI);
+                    }
+                    else if (theta_norm < -PI)
+                    {
+                        theta_norm += (2.0f * PI);
+                    }
                     this->vectorPolygons.push_back(Polygon{
-                        .theta = min_ang,
-                        .ox = min_px,
-                        .oy = min_py,
-                    });
+                        .theta = theta_norm,
+                        .px = min_px,
+                        .py = min_py,
+                        .distance = localDist});
                 }
-                // else
-                // {
-                //     this->vectorPolygons.push_back(Polygon{
-                //         .theta = ang,
-                //         .ox = ox + rdx,
-                //         .oy = oy + rdy,
-                //     });
-                // }
             }
         }
     }
@@ -141,7 +154,7 @@ void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, st
         this->vectorPolygons.end(),
         [&](const Polygon &t1, const Polygon &t2)
         {
-            if (std::fabs(t1.ox - t2.ox) < 0.1f && std::fabs(t1.oy - t2.oy) < 0.1f)
+            if (std::fabs(t1.px - t2.px) < 0.1f && std::fabs(t1.py - t2.py) < 0.1f)
             {
                 return true;
             }
@@ -155,35 +168,143 @@ void RayCasting::calculateVisibilityPolygon(float ox, float oy, float radius, st
     this->raysCasted.rayCastUnique = this->vectorPolygons.size();
 }
 
-void RayCasting::Draw(raylib::Vector2 source)
+void RayCasting::getLidarRays(float ox, float oy, float resolution, float maxRange, float carHeadingRad, const std::vector<MapGenerator::Line> &_edges)
+{
+    this->vectorLidarRays.clear();
+
+    int idx = 0;
+    for (float angleRad = -PI; angleRad < (PI - 0.0001f); angleRad += resolution)
+    {
+
+        // global angle of ray
+        float currentLidarRayAngle = angleRad + carHeadingRad;
+
+        // WRAP to [-PI,PI]
+        while (currentLidarRayAngle > PI)
+        {
+            currentLidarRayAngle -= (2.0f * PI);
+        }
+        while (currentLidarRayAngle < -PI)
+        {
+            currentLidarRayAngle += (2.0f * PI);
+        }
+
+        // ray direction vector
+        float rdx = std::cos(currentLidarRayAngle);
+        float rdy = std::sin(currentLidarRayAngle);
+
+        float closestDistance = maxRange;
+        bool hitSomething = false;
+
+        // test ray against all edges
+        // ADD SPATIAL PARTITIONING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // group edges in chunks and only check the chunk closest to the car!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        for (const MapGenerator::Line &edge : _edges)
+        {
+            float sdx = edge.end.x - edge.start.x;
+            float sdy = edge.end.y - edge.start.y;
+
+            float denom = (rdx * sdy - rdy * sdx);
+
+            // check if lines are parallel
+            if (std::fabs(denom) > 0.0001f)
+            {
+                // t1: distance along the lidar ray
+                float t1 = ((edge.start.x - ox) * sdy - (edge.start.y - oy) * sdx) / denom;
+
+                // t2: position along the line segment normalized 0.0 to 1.0
+                float t2 = ((edge.start.x - ox) * rdy - (edge.start.y - oy) * rdx) / denom;
+
+                if (t2 >= 0.0f && t2 <= 1.0f && t1 > 0.0f)
+                {
+                    if (t1 < closestDistance)
+                    {
+                        closestDistance = t1;
+                        hitSomething = true;
+                    }
+                }
+            }
+        }
+
+        vectorLidarRays.push_back(LidarRay{
+            .hit = hitSomething,
+            .angle = angleRad,
+            .distance = closestDistance});
+    }
+    this->raysCasted.rayLidar = this->vectorLidarRays.size();
+}
+
+void RayCasting::DrawVisibilityPolygon(raylib::Vector2 source)
 {
     if (this->vectorPolygons.size() > 1)
     {
-        for (int i = 0; i < vectorPolygons.size() - 1; i++)
+        for (int i = 0; i < vectorPolygons.size(); i++)
         {
-            DrawTriangleLines(
-                source,
-                {this->vectorPolygons[i + 1].ox, this->vectorPolygons[i + 1].oy},
-                {this->vectorPolygons[i].ox, this->vectorPolygons[i].oy},
-                raylib::Color::Yellow());
+            int next_idx = (i + 1) % vectorPolygons.size();
+            raylib::Vector2 p1 = {vectorPolygons[i].px, vectorPolygons[i].py};
+            raylib::Vector2 p2 = {vectorPolygons[next_idx].px, vectorPolygons[next_idx].py};
 
-            // DrawTriangleLines(
-            //     source,
-            //     {this->vectorPolygons[i].ox, this->vectorPolygons[i].oy},
-            //     {this->vectorPolygons[i + 1].ox, this->vectorPolygons[i + 1].oy},
-            //     raylib::Color::Yellow());
+            // Draw the perimeter the Lidar tests against in bright MAGENTA
+            DrawLineEx(p1, p2, 2.0f, raylib::Color::Magenta());
+
+            // Draw a small circle at the vertex to see the points
+            DrawCircleV(p1, 3.0f, raylib::Color::Green());
+
+            // Optional: Draw the ID to see the sorting order
+            // DrawText(TextFormat("id:%i", i), p1.x + 5, p1.y + 5, 10, WHITE);
+            // // DrawTriangleLines(
+            // //     source,
+            // //     {this->vectorPolygons[i + 1].px, this->vectorPolygons[i + 1].py},
+            // //     {this->vectorPolygons[i].px, this->vectorPolygons[i].py},
+            // //     raylib::Color::Yellow());
+            // DrawLineV(source, {vectorPolygons[i].px, vectorPolygons[i].py}, raylib::Color::Yellow());
+            // DrawText(TextFormat("r:%i", i), vectorPolygons[i].px + 10, vectorPolygons[i].py + 10, 20, RED);
         }
 
         // close triangle at the end
-        DrawTriangleLines(
-            source,
-            {this->vectorPolygons[0].ox, this->vectorPolygons[0].oy},
-            {this->vectorPolygons[vectorPolygons.size() - 1].ox, this->vectorPolygons[vectorPolygons.size() - 1].oy},
-            raylib::Color::Yellow());
+        // DrawTriangleLines(
+        //     source,
+        //     {this->vectorPolygons[0].px, this->vectorPolygons[0].py},
+        //     {this->vectorPolygons[vectorPolygons.size() - 1].px, this->vectorPolygons[vectorPolygons.size() - 1].py},
+        //     raylib::Color::Yellow());
     }
 }
 
 RayCasting::RayCast RayCasting::getNumberRays()
 {
-    return {raysCasted.rayCast, raysCasted.rayCastUnique};
+    return {raysCasted.rayCast, raysCasted.rayCastUnique, raysCasted.rayLidar};
+}
+
+void RayCasting::printVisibilityPolygon(int nr)
+{
+
+    std::cout << "nr polys: " << vectorPolygons.size() << "\n";
+    int idx = 0;
+    for (const RayCasting::Polygon poly : vectorPolygons)
+    {
+        std::cout << "id: " << idx << "; ox: " << poly.px << "; oy: " << poly.py << "; theta: " << poly.theta << "; dist= " << poly.distance << "\n";
+        idx++;
+    }
+    idx = 0;
+}
+
+void RayCasting::DrawLidarRays(raylib::Vector2 source, float carHeadingRad)
+{
+    if (this->vectorLidarRays.size() > 1)
+    {
+        for (int i = 0; i < vectorLidarRays.size(); i++)
+        {
+            float globalAngle = vectorLidarRays[i].angle + carHeadingRad;
+            float hitx = source.x + std::cos(globalAngle) * vectorLidarRays[i].distance;
+            float hity = source.y + std::sin(globalAngle) * vectorLidarRays[i].distance;
+
+            if (vectorLidarRays[i].hit)
+
+                DrawLineV(source, {hitx, hity}, raylib::Color::Red());
+            else
+                DrawLineV(source, {hitx, hity}, raylib::Color::DarkBlue());
+
+            DrawText(TextFormat("%i, ang:%02.02f, d:%02.02f", i, vectorLidarRays[i].angle, vectorLidarRays[i].distance), hitx + 10, hity + 10, 20, RED);
+        }
+    }
 }

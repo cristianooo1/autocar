@@ -15,13 +15,11 @@ int main(int argc, char *argv[])
     SetTargetFPS(60);
     raylib::Color background = raylib::Color::SkyBlue();
 
-    // Game game(window.GetWidth(), window.GetHeight());
-    Game game(20, 20);
+    Game game(16, 9);
+    int display = GetCurrentMonitor();
+    SetWindowSize(GetMonitorWidth(display), GetMonitorHeight(display));
+    ToggleBorderlessWindowed();
 
-    // MAIN GAME LOOP
-    // 1. event handling
-    // 2. update positions
-    // 3. drawing objects
     while (!window.ShouldClose())
     {
 
@@ -31,6 +29,7 @@ int main(int argc, char *argv[])
 
         window.BeginDrawing();
         window.ClearBackground(background);
+
         game.Draw();
 
         window.EndDrawing();

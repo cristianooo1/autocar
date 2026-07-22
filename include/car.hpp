@@ -18,9 +18,11 @@ public:
 
     void SetThrottle(int direction, float dt);
     void SetSteering(int direction, float dt);
+    void SetPosition(float x, float y);
 
     raylib::Vector2 GetCarPosition();
     std::vector<raylib::Vector2> GetCarBoundaries();
+    float GetCarOrientationRad();
 
 private:
     Transform2D _carTransform;
