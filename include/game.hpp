@@ -38,5 +38,6 @@ private:
     float dt;
     bool IsMousePressed;
 
-    raylib::Vector2 CheckCollision();
+    bool CheckCollision(raylib::Vector2 &collision_point);
+    raylib::Vector2 collision_point{};
 };

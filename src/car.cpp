@@ -64,7 +64,12 @@ void Car::Draw()
                      this->_carTransform.orientationDeg,
                      raylib::Color::White());
 
-    DrawCircle(_carTransform.position.x, _carTransform.position.y, 5.0f, raylib::Color::Red());
+    DrawCircle(_carTransform.position.x, _carTransform.position.y, 5.0f, raylib::Color::Black());
+
+    DrawCircleV({_carBB.GetCorners(_carTransform)[0].x, _carBB.GetCorners(_carTransform)[0].y}, 5.0f, raylib::Color::Red());
+    DrawCircleV({_carBB.GetCorners(_carTransform)[1].x, _carBB.GetCorners(_carTransform)[1].y}, 5.0f, raylib::Color::Blue());
+    DrawCircleV({_carBB.GetCorners(_carTransform)[2].x, _carBB.GetCorners(_carTransform)[2].y}, 5.0f, raylib::Color::Green());
+    DrawCircleV({_carBB.GetCorners(_carTransform)[3].x, _carBB.GetCorners(_carTransform)[3].y}, 5.0f, raylib::Color::Yellow());
 }
 
 raylib::Vector2 Car::GetCarPosition()

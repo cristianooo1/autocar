@@ -57,13 +57,17 @@ void Game::Draw()
     // {
     //     obstacle.Draw();
     // }
+
+    // COLLISION DRAW
+    if (this->CheckCollision(this->collision_point))
+    {
+        DrawCircleV({this->collision_point.x, this->collision_point.y}, 5.0f, raylib::Color::Red());
+    }
 }
 
 void Game::Update()
 {
     _car.Update();
-    // raylib::Vector2 coll_point = CheckCollision();
-    // DrawCircleV({coll_point.x, coll_point.y}, 2.0f, raylib::Color::Red());
 }
 
 void Game::HandleInput()
@@ -139,14 +143,35 @@ std::vector<Obstacle> Game::CreateObstacles()
     return obstacles;
 }
 
-raylib::Vector2 Game::CheckCollision()
+bool Game::CheckCollision(raylib::Vector2 &collision_point)
 {
-    raylib::Vector2 coll;
-    CheckCollisionLines({_car.GetCarBoundaries()[0].x, _car.GetCarBoundaries()[0].y},
-                        {_car.GetCarBoundaries()[1].x, _car.GetCarBoundaries()[1].y},
-                        {400.0f, 200.0f},
-                        {440.0f, 200.0f},
-                        &coll);
+    for (const MapGenerator::Line &line : this->_boundaries)
+    {
 
-    return coll;
+        if (CheckCollisionLines({_car.GetCarBoundaries()[0].x, _car.GetCarBoundaries()[0].y},
+                                {_car.GetCarBoundaries()[1].x, _car.GetCarBoundaries()[1].y},
+                                line.start,
+                                line.end,
+                                &collision_point) ||
+            CheckCollisionLines({_car.GetCarBoundaries()[1].x, _car.GetCarBoundaries()[1].y},
+                                {_car.GetCarBoundaries()[3].x, _car.GetCarBoundaries()[3].y},
+                                line.start,
+                                line.end,
+                                &collision_point) ||
+            CheckCollisionLines({_car.GetCarBoundaries()[3].x, _car.GetCarBoundaries()[3].y},
+                                {_car.GetCarBoundaries()[2].x, _car.GetCarBoundaries()[2].y},
+                                line.start,
+                                line.end,
+                                &collision_point) ||
+            CheckCollisionLines({_car.GetCarBoundaries()[2].x, _car.GetCarBoundaries()[2].y},
+                                {_car.GetCarBoundaries()[0].x, _car.GetCarBoundaries()[0].y},
+                                line.start,
+                                line.end,
+                                &collision_point))
+        {
+            return true;
+            break;
+        }
+    }
+    return false;
 }
